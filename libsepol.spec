@@ -1,11 +1,12 @@
 Summary: SELinux binary policy manipulation library 
 Name: libsepol
 Version: 2.0.41
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 Source: http://www.nsa.gov/selinux/archives/libsepol-%{version}.tgz
 Patch: libsepol-rhat.patch
+Patch1: libsepol-relro.patch
 URL: http://www.selinuxproject.org
 
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -47,6 +48,7 @@ needed for developing applications that manipulate binary policies.
 %prep
 %setup -q
 %patch -p1 -b .rhat
+%patch1 -p1 -b .relro
 # sparc64 is an -fPIC arch, so we need to fix it here
 %ifarch sparc64
 sed -i 's/fpic/fPIC/g' src/Makefile
@@ -99,6 +101,9 @@ exit 0
 /%{_lib}/libsepol.so.1
 
 %changelog
+* Thu Aug 11 2011 Miroslav Grepl <mgrepl@redhat.com> 2.0.41-4
+- Recompile libraries with partial relro 
+
 * Thu Feb 18 2010 Dan Walsh <dwalsh@redhat.com> 2.0.41-3
 - Fix libsepol.pc file
 Resolves: #566496
