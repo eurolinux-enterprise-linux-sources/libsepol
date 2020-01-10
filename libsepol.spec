@@ -1,11 +1,11 @@
 Summary: SELinux binary policy manipulation library 
 Name: libsepol
 Version: 2.5
-Release: 10%{?dist}
+Release: 6%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 Source: https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/20160223/libsepol-2.5.tar.gz
-# HEAD bfaa258580f74440ca92d68828ac31f58656f5ef
+# HEAD e7ab0f8b86a3f6234f264d3bf98ccfb070ebaca7
 Patch1: libsepol-rhel.patch
 URL: https://github.com/SELinuxProject/selinux/wiki
 BuildRequires: flex
@@ -104,31 +104,6 @@ exit 0
 %{_libdir}/libsepol.so.1
 
 %changelog
-* Wed Jul 25 2018 Vit Mojzis <vmojzis@redhat.com> - 2.5-10
-- Add support for the SCTP portcon keyword (rhbz#1603571)
-
-* Mon Apr 30 2018 Vit Mojzis <vmojzis@redhat.com> - 2.5-9
-- Define extended_socket_class policy capability (rhbz#1564775)
-
-* Thu Oct 12 2017 Vit Mojzis <vmojzis@redhat.com> - 2.5-8.1
-- Define nnp_nosuid_transition policy capability (rhbz#1480519)
-- use IN6ADDR_ANY_INIT to initialize IPv6 addresses
-- Allow runtime labeling of ibendports (rhbz#1464489)
-- Allow runtime labeling of Infiniband Pkeys (rhbz#1464489)
-- Add IB end port handling to CIL (rhbz#1464489)
-- Add ibendport ocontext handling (rhbz#1464489)
-- Add support for ibendportcon labels (rhbz#1464489)
-- Add Infiniband Pkey handling to CIL (rhbz#1464489)
-- Add ibpkey ocontext handling (rhbz#1464489)
-- Add support for ibpkeycon labels (rhbz#1464489)
-- Remove unused attribute on a used argument from avrule_read() (rhbz#1464489)
-- Add binary module support for xperms
-- Add support for converting extended permissions to CIL 
-
-* Wed Sep 20 2017 Vit Mojzis <vmojzis@redhat.com> - 2.5-7
-- Define cgroup_seclabel policy capability (rhbz#1493517)
-- Fix unitialized jmp and invalid dereference
-
 * Wed Aug 10 2016 Petr Lautrbach <plautrba@redhat.com> 2.5-6
 - Fix memory leak in expand.c
 - Fix invalid read when policy file is corrupt
