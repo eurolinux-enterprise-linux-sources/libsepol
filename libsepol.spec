@@ -1,13 +1,14 @@
 Summary: SELinux binary policy manipulation library 
 Name: libsepol
-Version: 2.1.9
-Release: 3%{?dist}
+Version: 2.5
+Release: 10%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
-Source: http://www.nsa.gov/selinux/archives/libsepol-%{version}.tgz
-Patch: libsepol-rhat.patch
-URL: http://www.selinuxproject.org
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+Source: https://raw.githubusercontent.com/wiki/SELinuxProject/selinux/files/releases/20160223/libsepol-2.5.tar.gz
+# HEAD bfaa258580f74440ca92d68828ac31f58656f5ef
+Patch1: libsepol-rhel.patch
+URL: https://github.com/SELinuxProject/selinux/wiki
+BuildRequires: flex
 
 %description
 Security-enhanced Linux is a feature of the Linux® kernel and a number
@@ -28,7 +29,7 @@ on binary policies such as customizing policy boolean settings.
 %package devel
 Summary: Header files and libraries used to build policy manipulation tools
 Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description devel
 The libsepol-devel package contains the libraries and header files
@@ -37,15 +38,15 @@ needed for developing applications that manipulate binary policies.
 %package static
 Summary: static libraries used to build policy manipulation tools
 Group: Development/Libraries
-Requires: %{name}-devel = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 
 %description static
 The libsepol-static package contains the static libraries and header files
 needed for developing applications that manipulate binary policies. 
 
 %prep
-%setup -q
-%patch -p2 -b .rhat
+%setup -q -n libsepol-2.5
+%patch1 -p1 -b .rhel
 
 # sparc64 is an -fPIC arch, so we need to fix it here
 %ifarch sparc64
@@ -54,7 +55,7 @@ sed -i 's/fpic/fPIC/g' src/Makefile
 
 %build
 make clean
-make %{?_smp_mflags} CFLAGS="%{optflags}"
+make %{?_smp_mflags} CFLAGS="%{optflags}" LDFLAGS="%{?__global_ldflags}"
 
 %install
 rm -rf ${RPM_BUILD_ROOT}
@@ -64,7 +65,7 @@ mkdir -p ${RPM_BUILD_ROOT}%{_includedir}
 mkdir -p ${RPM_BUILD_ROOT}%{_bindir} 
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man3
 mkdir -p ${RPM_BUILD_ROOT}%{_mandir}/man8
-make DESTDIR="${RPM_BUILD_ROOT}" LIBDIR="${RPM_BUILD_ROOT}%{_libdir}" SHLIBDIR="${RPM_BUILD_ROOT}/%{_lib}" install
+make DESTDIR="${RPM_BUILD_ROOT}" LIBDIR="${RPM_BUILD_ROOT}%{_libdir}" SHLIBDIR="${RPM_BUILD_ROOT}/%{_libdir}" install
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/genpolbools
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/genpolusers
 rm -f ${RPM_BUILD_ROOT}%{_bindir}/chkcon
@@ -93,12 +94,75 @@ exit 0
 %dir %{_includedir}/sepol
 %dir %{_includedir}/sepol/policydb
 %{_includedir}/sepol/policydb/*.h
+%dir %{_includedir}/sepol/cil
+%{_includedir}/sepol/cil/*.h
 
 %files
 %defattr(-,root,root)
-/%{_lib}/libsepol.so.1
+%{!?_licensedir:%global license %%doc}
+%license COPYING
+%{_libdir}/libsepol.so.1
 
 %changelog
+* Wed Jul 25 2018 Vit Mojzis <vmojzis@redhat.com> - 2.5-10
+- Add support for the SCTP portcon keyword (rhbz#1603571)
+
+* Mon Apr 30 2018 Vit Mojzis <vmojzis@redhat.com> - 2.5-9
+- Define extended_socket_class policy capability (rhbz#1564775)
+
+* Thu Oct 12 2017 Vit Mojzis <vmojzis@redhat.com> - 2.5-8.1
+- Define nnp_nosuid_transition policy capability (rhbz#1480519)
+- use IN6ADDR_ANY_INIT to initialize IPv6 addresses
+- Allow runtime labeling of ibendports (rhbz#1464489)
+- Allow runtime labeling of Infiniband Pkeys (rhbz#1464489)
+- Add IB end port handling to CIL (rhbz#1464489)
+- Add ibendport ocontext handling (rhbz#1464489)
+- Add support for ibendportcon labels (rhbz#1464489)
+- Add Infiniband Pkey handling to CIL (rhbz#1464489)
+- Add ibpkey ocontext handling (rhbz#1464489)
+- Add support for ibpkeycon labels (rhbz#1464489)
+- Remove unused attribute on a used argument from avrule_read() (rhbz#1464489)
+- Add binary module support for xperms
+- Add support for converting extended permissions to CIL 
+
+* Wed Sep 20 2017 Vit Mojzis <vmojzis@redhat.com> - 2.5-7
+- Define cgroup_seclabel policy capability (rhbz#1493517)
+- Fix unitialized jmp and invalid dereference
+
+* Wed Aug 10 2016 Petr Lautrbach <plautrba@redhat.com> 2.5-6
+- Fix memory leak in expand.c
+- Fix invalid read when policy file is corrupt
+- Fix possible use of uninitialized variables
+
+* Tue Aug 02 2016 Petr Lautrbach <plautrba@redhat.com> 2.5-5
+- Warn instead of fail if permission is not resolved
+- Ignore object_r when adding userrole mappings to policydb
+
+* Tue Jul 12 2016 Petr Lautrbach <plautrba@redhat.com> 2.5-4
+- Add missing return to sepol_node_query()
+
+* Mon Jun 27 2016 Petr Lautrbach <plautrba@redhat.com> - 2.5-3
+- Correctly detect unknown classes in sepol_string_to_security_class
+- Sort object files for deterministic linking order
+- Fix neverallowxperm checking on attributes
+- Remove libsepol.map when cleaning
+- Add high-level language line marking support to CIL
+- Change logic of bounds checking to match change in kernel
+- Fix multiple spelling errors
+- Only apply bounds checking to source types in rules
+- Fix CIL and not add an attribute as a type in the attr_type_map
+- Build policy on systems not supporting DCCP protocol
+- Fix extended permissions neverallow checking
+- Fix CIL neverallow and bounds checking
+- Android.mk: Add -D_GNU_SOURCE to common_cflags
+
+* Mon Apr 11 2016 Petr Lautrbach <plautrba@redhat.com> - 2.5-2.1
+- Fix bug in CIL when resetting classes
+- Add support for portcon dccp protocol
+
+* Tue Feb 23 2016 Petr Lautrbach <plautrba@redhat.com> 2.5-1
+- Update to upstream release 2016-02-23
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 2.1.9-3
 - Mass rebuild 2014-01-24
 
