@@ -1,7 +1,7 @@
 Summary: SELinux binary policy manipulation library 
 Name: libsepol
 Version: 2.1.9
-Release: 1%{?dist}
+Release: 3%{?dist}
 License: LGPLv2+
 Group: System Environment/Libraries
 Source: http://www.nsa.gov/selinux/archives/libsepol-%{version}.tgz
@@ -99,6 +99,12 @@ exit 0
 /%{_lib}/libsepol.so.1
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 2.1.9-3
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 2.1.9-2
+- Mass rebuild 2013-12-27
+
 * Thu Feb 7 2013 Dan Walsh <dwalsh@redhat.com> - 2.1.9-1
 - Update to upstream 
 	* filename_trans: use some better sorting to compare and merge
